@@ -4,3 +4,126 @@
 
 每个布局文件都会对应生成一个绑定类。默认情况下，类的名称是基于布局文件的名称的，将它转换为驼峰形式并在它的末尾添加Binding。上述文件的名是activity_main.xml,所以对应生成的类是ActivityMainBinding。这个类持有了从布局属性到布局视图的绑定，以及知道如何为绑定表达式赋值。
 
+创建绑定对象
+___
+
+绑定对象应该在布局生成之后就被创建来确保视图层没有在它使用绑定表达式绑定到布局之前被创建。绑定对象到布局的最常见方式是使用绑定类的静态方法。你可以生成视图层然后使用binding类的inflate()方法把对象绑定到它身上，如下例所示：
+
+	@Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    MyLayoutBinding binding = MyLayoutBinding.inflate(getLayoutInflater());
+    }
+又一个inflate()方法的替代版本，除了LayoutInflater对象之外，添加了一个ViewGroup对象，如下例所示：
+	  
+	  MyLayoutBinding binding = MyLayoutBinding.inflate(getLayoutInflater(),   viewGroup, false);
+
+如果布局使用了不同的机制，就可以分别捆绑，如下：
+
+    MyLayoutBinding binding = MyLayoutBinding.bind(viewRoot);
+
+有时候绑定类型是不能提前知道的。在这种情况下，绑定可以使用DataBindingUtils进行创建，如以下的代码片段所示：
+		
+	View viewRoot = LayoutInflater.from(this).inflate(layoutId, parent, attachToParent);
+    ViewDataBinding binding = DataBindingUtil.bind(viewRoot);
+    
+如果你在Fragment,ListView或者RecyclerView adapter内部使用数据绑定，你可能会想要使用绑定类的inflate()方法或是DataBindingUtil类，如下例所示：
+
+ListItemBinding binding = ListItemBinding.inflate(layoutInflater, viewGroup, false);
+// or
+ListItemBinding binding = DataBindingUtil.inflate(layoutInflater, R.layout.list_item, viewGroup, false);
+
+带有ID的视图
+___
+
+Data binding 库为布局中每一个有ID的视图在绑定类中创建了一个不可改变的值。例如，DataBinding库创建了TextView类型的firstName和lastName，如下布局：
+
+	<layout xmlns:android="http://schemas.android.com/apk/res/android">
+   		<data>
+      	 <variable name="user" type="com.example.User"/>
+   	</data>
+   	<LinearLayout
+      	 android:orientation="vertical"
+       	android:layout_width="match_parent"
+       	android:layout_height="match_parent">
+       	<TextView android:layout_width="wrap_content"
+           	android:layout_height="wrap_content"
+           	android:text="@{user.firstName}"
+   				android:id="@+id/firstName"/>
+       	<TextView android:layout_width="wrap_content"
+          	 android:layout_height="wrap_content"
+           		android:text="@{user.lastName}"
+  					android:id="@+id/lastName"/>
+ 				  </LinearLayout>
+
+    </layout>
+    
+Data Binding 一次性地就能将包含id的视图从视图层中分离出来。这个机制比对每个布局中的视图调用findViewById()方法快很多。
+
+id在没有数据绑定的时候不是必须的，但是还是存在一些从代码访问视图的必要情形。
+
+变量
+___
+
+数据绑定类为每个在布局中定义的变量都生成了存取方法。例如，以下的布局在绑定类中就生成了针对user,image以及note变量的绑定类。
+
+    <data>
+      <import type="android.graphics.drawable.Drawable"/>
+      <variable name="user" type="com.example.User"/>
+      <variable name="image" type="Drawable"/>
+      <variable name="note" type="String"/>
+    </data>    
+
+viewStubs
+___
+
+不像正常的视图，ViewStub对象开始的时候不是一个可见的对象。当它被设置成可见或明确地要去生成的时候，它们通过inflate其他布局的方式来取代它们自己。
+
+因为ViewStub基本上会从视图层上消失，绑定对象的视图也必须消失从而才能被垃圾回收认领。因为视图是final的，ViewStubProxy对象取代了ViewStub在生成绑定类中的位置，当ViewStub存在的时候给予你访问的权限同时也给予你当ViewStub被填充时填充视图的权限。
+
+当填充另一个布局的时候，必须建立为新的布局建立绑定，因此，ViewStubProxy必须监听ViewStubListener并且在必要的时候建立绑定。因为同一时间只能存在一个listener,ViewStubProxy允许你设置子一个OnInflateListener，它会在建立连接后调用。
+
+立即绑定
+___
+
+但变量或者可观察对象发生改变的时候，绑定时被安排到下一桢之前改变的。但是很多情况下，绑定必须被立即执行。为了能强制执行，使用executePendingBindings()方法。
+
+高级绑定
+___
+
+很多时候，binding类是不确定的。例如，RecyclerView.Adapter操作着不同的布局并没有确定的绑定类。但是它仍旧必须在调用onBindViewHolder的时候完成绑定值的赋予。
+
+	public void onBindViewHolder(BindingHolder holder, int position) {
+    final T item = items.get(position);
+    holder.getBinding().setVariable(BR.item, item);
+    holder.getBinding().executePendingBindings();
+    }
+注意DataBinding库会在module包中生成一个叫BR的类，它包含了用于数据绑定的资源的id。在上例中，库自动生成了BR.item变量。
+
+后台线程
+___
+
+只要它不是一个集合，你就可以在后台线程中改变你的数据模型。在评估期间Data Binding本地化了每个变量/域来避免所有的并发问题。
+
+自定义绑定类名称
+___
+
+默认情况下，绑定类是基于布局文件的名称生成的，以大写字母开头，移除了下划线，将之后的单词的首字母大写，并添加Binding这个词。这个类被放置在module包的databing包下。例如，布局文件contact_item_xml就生成了ContactItemBinding类。如果module 包是com.example.my.app,那么绑定就会被放在com.example.my.app.databinding包中。
+
+绑定类可以通过调整data元素的class属性的方式被重命名并放置在不同的包下。例如，布局文件contact_item_xml在当前module的databinding包中生成了ContactItem类：
+		
+	<data class="ContactItem">
+        …
+    </data>     
+
+你可以通过在类名钱添加句号的方式把绑定类生成在不同的包中。下例生成的绑定类就在module的包中：
+
+	 <data class=".ContactItem">
+    …
+     </data>    
+
+对于你想要生成包名的地方，你也可以使用完成的包名。以下就在com.example包中创建了ContactItem绑定类：
+
+	<data class="com.example.ContactItem">
+    …
+    </data>     
