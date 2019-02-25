@@ -158,4 +158,23 @@ Android框架类的属性已有有创建好的BindingAdapter。例如，以下�
 
 ####自动对象转换
 
-   
+在一些情形中，在特有的类型之间，一个自定义的转换是需要的。例如，视图的android:background属性期待的是Drawable,但是color值指定的是一个整形。以下的例子展示的是属性期待的是Drawable但是，提供的却是integer的值。
+
+	<View
+    android:background="@{isError ? @color/red : @color/white}"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"/>
+    
+当期待的是Drawable，但是返回的却是integer的时候，int应该被转换成ColorDrawable。这个转换过程可以用一个带有BindingConversion注解的静态方式完成，以下：
+
+	@BindingConversion
+    public static ColorDrawable convertColorToDrawable(int color) {
+       return new ColorDrawable(color);
+    } 
+
+但是，在绑定表达式中提供的值类型必须是一致的。你不能在相同的表达式中使用不同的类型，如下所示：
+	
+	<View
+     android:background="@{isError ? @drawable/error : @color/white}"
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"/>  
