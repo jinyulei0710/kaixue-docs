@@ -30,4 +30,132 @@ DataBinding 在给出的名称的属性不存在的时候也能工作。你可�
 绝大数情况下，你不需要重命名Android 框架类中的setter。属性已经按名称约束实现了，会自动找到对应的方法。
 
 ###提供自定义逻辑	
-	
+
+一些属性需要自定义的绑定逻辑。例如，没有针对android:paddingLeft属性的setter。作为替代，被提供的是setPadding(left,top,right,bottom)。有着BindingAdapter注解的静态绑定方法允许你在属性被调用的时候自定义setter。
+
+Android框架类的属性已有有创建好的BindingAdapter。例如，以下的例子展示了针对paddingLeft的属性的绑定适配器。
+
+    @BindingAdapter("android:paddingLeft")
+    public static void setPaddingLeft(View view, int padding) {
+    view.setPadding(padding,
+                  view.getPaddingTop(),
+                  view.getPaddingRight(),
+                  view.getPaddingBottom());
+    }
+    
+参数类型是十分重要的。首个参数决定了属性相关的视图的类型。第二个参数决定了给定参数在绑定表达式中接收的类型。
+
+绑定适配器对其他类型的自定义是十分有用的。例如，一个自定义的加载器可以从工作线程加载图片。
+
+当存在冲突的时候，你自定义的适配器会重载由Android框架提供的默认适配器。
+
+你可以有接收多个属性的适配器，如下例所示：
+      
+     @BindingAdapter({"imageUrl", "error"})
+       public static void loadImage(ImageView view, String url, Drawable error) {
+     Picasso.get().load(url).error(error).into(view);
+    }
+  
+你可以像下例一样在你的布局中使用适配器。注意，@drawable/vennuErroe指向的是你应用中的资源。将资源包裹在@{}中，使其成为一个合法的绑定表达式。
+
+		<ImageView app:imageUrl="@{venue.imageUrl}" app:error="@{@drawable/venueError}" />
+
+注意：处于匹配的目的，数据绑定库忽略了自定义的命名空间。
+
+这个适配器在imageUrl和error同时被用到ImageView对象的时候会被使用，imageUrl是一个字符串并且error是一个Drawable。如果你想要任一的属性设置之后来让适配器被调用，你可以把适配器的可选的requireAll标记设置成false,如下例所示：
+   
+      @BindingAdapter(value={"imageUrl", "placeholder"}, requireAll=false)
+     public static void setImageUrl(ImageView imageView, String url, Drawable placeHolder) {
+       if (url == null) {
+    imageView.setImageDrawable(placeholder);
+      } else {
+    MyImageLoader.loadInto(imageView, url, placeholder);
+     }
+      }
+		
+注意当有冲突的时候，你的绑定适配器会重载默认的绑定适配器。
+
+绑定适配器方法可能会把旧的值带到他们的handler中。一个接收旧和新的值的方法，应该先声明旧的值，然后才是新的值，如下例所示：
+
+		@BindingAdapter("android:paddingLeft")
+     public static void setPaddingLeft(View view, int oldPadding, int newPadding) {
+    if (oldPadding != newPadding) {
+      view.setPadding(newPadding,
+                      view.getPaddingTop(),
+                      view.getPaddingRight(),
+                      view.getPaddingBottom());
+     }
+    }		
+
+事件处理可能只能在只有一个抽象方法的接口或抽象类中使用，如下例所示：
+
+		@BindingAdapter("android:onLayoutChange")
+     public static void setOnLayoutChangeListener(View view, View.OnLayoutChangeListener oldValue,
+       View.OnLayoutChangeListener newValue) {
+       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+    if (oldValue != null) {
+      view.removeOnLayoutChangeListener(oldValue);
+    }
+    if (newValue != null) {
+      view.addOnLayoutChangeListener(newValue);
+    }
+     }
+     }
+按如下所示在你的布局中使用这个事件处理器：
+
+ 		<View android:onLayoutChange="@{() -> handler.layoutChanged()}"/>
+当一个监听器有多个方法的时候，它必须划分为多个监听器。例如,View.OnAttachStateChangeListener有着两个方法：OnViewAttachedToWindown(View)以及onViewDetachedFromWindow(View)。这个库提供了两个接口来区分它们的属性和handler。
+
+	@TargetApi(VERSION_CODES.HONEYCOMB_MR1)
+    public interface OnViewDetachedFromWindow {
+       void onViewDetachedFromWindow(View v);
+     }
+
+     @TargetApi(VERSION_CODES.HONEYCOMB_MR1)
+     public interface OnViewAttachedToWindow {
+       void onViewAttachedToWindow(View v);
+       } 
+ 
+ 因为改变一个监听器的同时也会影响另一个，你需要一个对单个同时两个属性都好用的适配器。你可以在注解在把requireAll设置成false来制定不是每个属性都必须在绑定表达式中被赋值，如下例所示：
+ 
+ 			@BindingAdapter({"android:onViewDetachedFromWindow", 			"android:onViewAttachedToWindow"}, requireAll=false)
+		public static void setListener(View view, OnViewDetachedFromWindow detach, OnViewAttachedToWindow attach) {
+    if (VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB_MR1) {
+        OnAttachStateChangeListener newListener;
+        if (detach == null && attach == null) {
+            newListener = null;
+        } else {
+            newListener = new OnAttachStateChangeListener() {
+                @Override
+                public void onViewAttachedToWindow(View v) {
+                    if (attach != null) {
+                        attach.onViewAttachedToWindow(v);
+                    }
+                }
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                    if (detach != null) {
+                        detach.onViewDetachedFromWindow(v);
+                    }
+                }
+            };
+        }
+
+        OnAttachStateChangeListener oldListener = ListenerUtil.trackListener(view, newListener,
+                R.id.onAttachStateChangeListener);
+        if (oldListener != null) {
+            view.removeOnAttachStateChangeListener(oldListener);
+        }
+        if (newListener != null) {
+            view.addOnAttachStateChangeListener(newListener);
+        }
+    }
+}
+      
+以上的例子跟常见的相比要稍微复杂一些，因为View类使用的是addOnAttachStateChangeListener（）以及removeOnAttachStateChangeListener()而不是OnAttachStateChangeListener的setter方法。android.databinding.adapter.ListenerUtil类帮助记录了之前监听器的记录，所以他们能在绑定适配器中被移除。
+
+在接口OnViewDetachedFromWindow以及OnViewAttachedToWindow添加@TargetApi(VERSION_CODES.HONEYCOMB_MR1注解，数据绑定代码生成器知道监听器只在运行在Android 3.1(API level 12)以及更高版本的时候被生成，与addOnAttachStateChangeListener()方法支持的版本一致。
+
+####自动对象转换
+
+   
