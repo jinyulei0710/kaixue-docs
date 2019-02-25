@@ -1,0 +1,126 @@
+###双向数据绑定
+
+使用单项数据绑定，你可以在属性在设置一个值并设置一个监听器来响应属性的改变：
+
+	<CheckBox
+    android:id="@+id/rememberMeCheckBox"
+    android:checked="@{viewmodel.rememberMe}"
+    android:onCheckedChanged="@{viewmodel.rememberMeChanged}"
+     />
+双向绑定提供这个处理的快捷方式：
+	
+	<CheckBox
+    android:id="@+id/rememberMeCheckBox"
+    android:checked="@={viewmodel.rememberMe}"
+    />    
+     
+@={}符号，重要地包含了“=”操作符，接收了针对属性的数据改变的同时监听用户的更新。
+
+为了能对数据做出响应，你可以是你的布局变量实现observable，通常是BaseObservable。使用@Bindable组件，按如下代码片段所示：
+
+    public class LoginViewModel extends BaseObservable {
+    // private Model data = ...
+
+    @Bindable
+    public Boolean getRememberMe() {
+        return data.rememberMe;
+    }
+
+    public void setRememberMe(Boolean value) {
+        // Avoids infinite loops.
+        if (data.rememberMe != value) {
+            data.rememberMe = value;
+
+            // React to the change.
+            saveData();
+
+            // Notify observers of a new value.
+            notifyPropertyChanged(BR.remember_me);
+        }
+    }
+    }     
+
+因为可绑定的属性的getter方法叫做getRemenberMe(),属性对应的setter方法自动地使用了方法名setRemeberMe()。
+
+想要知道更对关于使用BaseObservable和@Bindable的信息，请看可观察数据对象的使用。
+
+####使用自定义属性的双向数据绑定
+___
+
+平台对于绝大部分双向属性和改变监听提供了双向数据绑定，你可以在你应用中使用它们。如果你想要在自定义属性上使用双向数据绑定，你需要使用@InverseBindingAdapter以及@inverseBindingMethod注解。
+
+例如，你想要打开名叫MyView的自定义视图的"time"属性的双向数据绑定，完成以下步骤：
+
+1.设置初始值以及数值发生变化的时候使用@BindingAdapter的注解：
+	
+	@BindingAdapter("time")
+    public static void setTime(MyView view, Time newValue) {
+    // Important to break potential infinite loops.
+    if (view.time != newValue) {
+        view.time = newValue;
+    }
+   }    
+  
+2.读取来自视图的值的时候使用@InverseBindingAdapter:
+   
+    @BindingAdapter("app:timeAttrChanged")
+     public static void setListeners(
+        MyView view, final InverseBindingListener attrChange) {
+    // Set a listener for click, focus, touch, etc.
+     }  
+
+监听器包含了一个InverseBindingListener作为一个参数。你使用InverseBindingListener告诉数据绑定系统属性值已经发生了变化。系统然后就能使用@InverseBindingAdapter方法注解。
+
+每个双向数据绑定都会生成一个合成的事件属性。这个属性跟基础属性一样有着相同的名称，但是它包含了后缀“AttrChanged"。合成的事件属性允许库去使用@BindingAdapter来创建一个方法注解去关联事件监听器到合适的视图属性上。
+
+在操作过程中，这个监听器包含了一些重要的逻辑，包括针对单向数据绑定的监听器。例如，看下针对文本属性改变的适配器，TextViewBindingAdapter。
+
+####转换器
+
+如果绑定的视图对象的变量需要在展示之前被格式化，翻译或做出一些改变，它可能需要一个Converter对象。
+
+例如，使用EditText对象来展示日期：
+
+	<EditText
+    android:id="@+id/birth_date"
+    android:text="@={Converter.dateToString(viewmodel.birthDate)}"
+     />   
+viewmodel。birthDate属性包含的是Long类型的值，所以它需要使用转换器进行格式化。
+
+因为使用了双向绑定，也需要存在一个反向的转换器让库知道如何转换用户提供的字符串转换回背后的数据类型Long。这个过程是通过添加@InverseMethod注解到其中的一个转换器并让这个注解引用这个反向转换器。在以下的代码片段中看下这个配置：
+
+	public class Converter {
+    @InverseMethod("stringToDate")
+    public static String dateToString(EditText view, long oldValue,
+            long value) {
+        // Converts long to String.
+    }
+
+    public static long stringToDate(EditText view, String oldValue,
+            String value) {
+        // Converts String to long.
+    }
+    }
+#### 使用双向数据绑定的无限循环
+
+注意当使用双向数据绑定的时候要避免引入无限循环。当用户改变了一个属性，使用@InverseBindingAdapter的方法注解被调用了，并且值被赋值到了背后的属性。相反的，回调用使用@BindingApdater注解的方法，它会触发使用@InverseBindingAdapter的另一个调用，等等。
+
+因此，在使用@BindingAdapter注解的方法内部，通过比较旧的和新的值打断可能无限的循环     是十分重要的。
+
+#### 双向属性
+
+当你使用下表的属性的时候，平台会提供给你内置的支持。想要知道平台是如何提供这个支持的，就看下对应绑定是俄配的实现。
+
+|类|属性|绑定适配器|
+|---|---|---|
+|AdapterView|	android:selectedItemPositionandroid:selection|AdapterViewBindingAdapter|
+|CalendarView|	android:date|	CalendarViewBindingAdapter|
+|CompoundButton|	android:checked|	CompoundButtonBindingAdapter|
+|DatePicker|	android:year android:month android:day|DatePickerBindingAdapter|
+|NumberPicker|	android:value	Number|PickerBindingAdapter|
+|RadioButton|	android:checkedButton|	RadioGroupBindingAdapter|
+|RatingBar|	android:rating|	RatingBarBindingAdapter|
+|SeekBar|	android:progress|	SeekBarBindingAdapter|
+|TabHost|	android:currentTab|	TabHostBindingAdapter|
+|TextView	|android:text|	TextViewBindingAdapter|
+|TimePicker|	android:hourandroid:minute|	TimePickerBindingAdapter|
