@@ -1,0 +1,114 @@
+###绑定布局视图到架构组件
+
+AndroidX库中包含了架构组件，你可以使用架构组件来设计强壮、可测试、以及可维护的应用。绑定库和架构组件无缝配合使用来使你UI的开发变得更加简单化。你应用中的布局可以绑定到架构组件中的数据，它已经帮助你管理UI控制器的生命周期以及通知数据中的改变。
+
+这页展示了如何将架构组件集成到你的布局中来进一步提供使用数据绑定库的好处。
+
+####使用LiveData来通知UI关于数据的改变
+___
+
+你可以使用LiveData对象作为数据绑定来源来自动通知UI关于数据发生的变化。想要知道更多关于这个架构组件的信息，看看LiveData 一览。
+
+不像实现了Observable的类，例如Observable fields-LiveData 对象知晓订阅了数据变更的观察者的生命周期。知晓这个之后得到了很多好处，这个内容会在使用LiveData的好处中提及到。在Android Studio 3.1以及更高版本上，在你的绑定数据代表中你可以用LiveData对象取代Observable fields。
+
+为了在你的绑定类中配合使用一个LiveData对象，你应该制定一个生命周期的宿主来定义LiveData对象的范围。以下的例子在绑定类被实例化之后，指定activity作为生命周期的宿主。
+
+	class ViewModelActivity extends AppCompatActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        // Inflate view and obtain an instance of the binding class.
+        UserBinding binding = DataBindingUtil.setContentView(this, R.layout.user);
+
+        // Specify the current activity as the lifecycle owner.
+        binding.setLifecycleOwner(this);
+    }
+    }
+
+你可以使用ViewModel组件，就像在使用ViewModel来管理UI相关的数据中讲述的一样，来绑定数据到布局上。在ViewModel组件中，你可以使用LiveData对象来转换数据或合并多个数据来源。下例就展示了如何在ViewModel中转换数据：
+
+    class ScheduleViewModel extends ViewModel {
+    LiveData username;
+
+    public ScheduleViewModel() {
+        String result = Repository.userName;
+        userName = Transformations.map(result, result -> result.value);
+    }
+    }    
+    
+使用ViewModel来管理UI相关的数据
+___
+
+数据绑定库能配合ViewModel组件无缝使用，它暴露出数据给布局，布局观察数据并对它的改变做出响应。将ViewModel组件与数据绑定库配合使用，允许你将UI逻辑从布局中移到组件中去，这样使测试变得简单。数据绑定库确保了视图和数据来源是在需要的时候进行绑定和反绑定的。剩余的大部分工作是你要确保你暴露的是正确的数据，想要知道更多这个架构组件的信息，来看ViewModel一览。
+
+为了将ViewModel组件与数据绑定库配合使用，你必须实例化你的组件，它是由ViewModel类继承而来的。获取一个您的绑定类的实例，将你的ViewModel组件赋值给绑定类中的一个属性。下例展示如何与数据绑定库一起使用这个组件：
+	
+	class ViewModelActivity extends AppCompatActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        // Obtain the ViewModel component.
+        UserModel userModel = ViewModelProviders.of(getActivity())
+                                                  .get(UserModel.class);
+
+        // Inflate view and obtain an instance of the binding class.
+        UserBinding binding = DataBindingUtil.setContentView(this, R.layout.user);
+
+        // Assign the component to a property in the binding class.
+        binding.viewmodel = userModel;
+    }
+    }
+    
+ 在你的布局中，使用绑定表达式，赋值你的ViewModel组件的属性和方法到对应的视图中去，如下例所示：
+ 
+ 	  <CheckBox
+    android:id="@+id/rememberMeCheckBox"
+    android:checked="@{viewmodel.rememberMe}"
+    android:onCheckedChanged="@{() -> viewmodel.rememberMeChanged()}" />   
+    
+使用可观察的ViewModel在绑定适配器上施加更多控制
+___
+
+你可以使用一个实现了Observable接口的ViewModle组件来通知应用组件关于数据的变更，与你使用LivaData对象类似。
+
+在一些情况下你可能会选择使用实现了Observable接口的ViewModel组件而不是使用LiveData对象，就是你失去了LiveData生命周期管理的能力。使用实现了Observable接口的ViewModel组件是你在你的app中对绑定适配器施加更多控制。例如，这个模式能让你在数据改变的时候获得更多关于通知的控制，他也允许你指定一个自定义方法来设置双向数据绑定中的属性值。
+
+为了实现一个可观察的ViewModel组件，你必须创建一个由ViewModel继承而来的类并实现Observable接口。你可以在观察者订阅和取消订阅的时候使用addOnPropertyChangedCallback()和removeOnPropertyChangedCallback()方法提供你自定义的逻辑。你也可以在提供自定义的逻辑，这个逻辑在notifyPropertyChanged()属性发生变化的时候运行。以下的示例代码展示了如何去实现一个可观察的ViewModel:
+	     
+	     
+	     
+                /**
+                 * A ViewModel that is also an Observable,
+            * to be used with the Data Binding Library.
+           */
+    class ObservableViewModel extends ViewModel implements Observable {
+    private PropertyChangeRegistry callbacks = new PropertyChangeRegistry();
+
+    @Override
+    protected void addOnPropertyChangedCallback(
+            Observable.OnPropertyChangedCallback callback) {
+        callbacks.add(callback);
+    }
+
+    @Override
+    protected void removeOnPropertyChangedCallback(
+            Observable.OnPropertyChangedCallback callback) {
+        callbacks.remove(callback);
+    }
+
+    /**
+     * Notifies observers that all properties of this instance have changed.
+     */
+    void notifyChange() {
+        callbacks.notifyCallbacks(this, 0, null);
+    }
+
+    /**
+     * Notifies observers that a specific property has changed. The getter for the
+     * property that changes should be marked with the @Bindable annotation to
+     * generate a field in the BR class to be used as the fieldId parameter.
+     *
+     * @param fieldId The generated BR id for the Bindable field.
+     */
+    void notifyPropertyChanged(int fieldId) {
+        callbacks.notifyCallbacks(this, fieldId, null);
+    }
+    }
