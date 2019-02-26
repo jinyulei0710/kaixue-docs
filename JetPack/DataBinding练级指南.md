@@ -36,3 +36,48 @@ DataBinding是一个自2015 Google IO 非C位出道的的一个框架。它的�
 
 ###拥抱绑定表达式
 
+为了能写出绑定表达式，我们首先要在data区域中声明变量，从而让我们的布局能找到数据。
+     <?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="loginPresenter"
+            type="com.cjs.br.presenter.me.LoginPresenter" />
+
+       ...
+    </data>
+       ...
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
+
+
+
+然后，我们就能在xml的属性中使用布局表达式语言了。表达式由大括号包围着，并且有着一个@符号作为前缀：
+   
+	<Element
+	     attr="@{expression}/>
+
+然后我们在代码中将我们引入布局的变量进行赋值：
+
+    binding.setLoginPresenter(mPresenter);
+    
+    
+经历了上述过程我们已经跨越了初级阶段，这一切就像变魔法一样。但是建国之后不许成精，所以请看本期走进科学，DataBinding魔法背后的故事。  
+
+##中级阶段
+
+###内置的绑定适配器(Binding Adapters)   
+
+魔法的背后是DataBinding框架内置的绑定适配器，处理了几乎所有的事情。框架中的所有调用，实现上都是在BindingAdaper中完成的。
+
+###自定义的绑定适配器
+
+### 可观察的数据
+
+##高级阶段
+
+### 双向绑定  
