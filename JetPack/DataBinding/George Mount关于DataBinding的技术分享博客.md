@@ -1,7 +1,7 @@
 * [No More findViewById](https://medium.com/androiddevelopers/no-more-findviewbyid-457457644885)
-* Android Data Binding:That \<include> Thing-when layouts \<include> other \<layout>s
-* Android Data Binding: Adding some Variability -Marking View IDs unnecessary
-* Android Data Binding: Express Yourself- A bit More Than Field Access
+* [Android Data Binding:That \<include> Thing-when layouts \<include> other \<layout>s](https://medium.com/androiddevelopers/android-data-binding-that-include-thing-1c8791dd6038)
+* [Android Data Binding: Adding some Variability -Marking View IDs unnecessary](https://medium.com/google-developers/android-data-binding-adding-some-variability-1fe001b3abcc)
+* [Android Data Binding: Express Yourself- A bit More Than Field Access](https://medium.com/androiddevelopers/android-data-binding-express-yourself-c931d1f90dfe)
 * Android Data Binding: The Big event - And You Don't Even have to Dress up
 * Android Data Binding:Let's Flip this Thing - Get That User Input Back Into The Application
 * Android Data Binding:Custom Setters - Mark DataBinding Do What You Want
