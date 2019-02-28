@@ -1,4 +1,4 @@
-* [^No More findViewById]https://medium.com/androiddevelopers/no-more-findviewbyid-457457644885
+* [^No More findViewById]:https://medium.com/androiddevelopers/no-more-findviewbyid-457457644885
 * Android Data Binding:That \<include> Thing-when layouts \<include> other \<layout>s
 * Android Data Binding: Adding some Variability -Marking View IDs unnecessary
 * Android Data Binding: Express Yourself- A bit More Than Field Access
