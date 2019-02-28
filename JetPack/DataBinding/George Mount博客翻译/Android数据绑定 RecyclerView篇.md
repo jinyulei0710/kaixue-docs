@@ -1,0 +1,1 @@
+Android Data Binding：RecyclerView Reduce Reuse Rebind
