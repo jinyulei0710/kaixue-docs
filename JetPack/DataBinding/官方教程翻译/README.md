@@ -58,12 +58,12 @@
         view.visibility = visible ? View.VISIBLE : View.GONE;
     }
 
-### 绑定布局视图到架构组件
+### [绑定布局视图到架构组件](https://github.com/jinyulei0710/kaixue-docs/blob/master/JetPack/DataBinding/%E5%AE%98%E6%96%B9%E6%95%99%E7%A8%8B%E7%BF%BB%E8%AF%91/%E5%B0%86%E5%B8%83%E5%B1%80%E8%A7%86%E5%9B%BE%E7%BB%91%E5%AE%9A%E5%88%B0%E6%9E%B6%E6%9E%84%E7%BB%84%E4%BB%B6.md)
 
 包含架构组件在内的Android支持库，使用这个库你能够设计强壮的、可测试、可维护的应用。
 你可以将架构组件与数据绑定库一同使用来进一步简化用户界面的开发。
 
-### 双向数据绑定
+### [双向数据绑定]()
 
 数据绑定库支持双向数据绑定。用于此类绑定的表示法支持接收对属性的数据更改并同时侦听对该属性的用户更新的能力。
 
