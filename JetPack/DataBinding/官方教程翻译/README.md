@@ -24,7 +24,7 @@
 
 学习如何准备好你的开发环境，让它能使用数据绑定库，包括在Android Studio中对数据绑定代码的支持。
 
-### 布局和绑定表达式
+### [布局和绑定表达式](https://github.com/jinyulei0710/kaixue-docs/blob/master/JetPack/DataBinding/%E5%AE%98%E6%96%B9%E6%95%99%E7%A8%8B%E7%BF%BB%E8%AF%91/%E5%B8%83%E5%B1%80%E5%92%8C%E7%BB%91%E5%AE%9A%E8%A1%A8%E8%BE%BE%E5%BC%8F.md)
 
 表达式语言允许你写表达式来将变量和布局中的视图关联起来。数据绑定库自动生成了绑定布局中视图和你的数据对象所需的类。这个库提供了例如imports，variables以及includes这些你能在布局中使用的特征。
 
