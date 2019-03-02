@@ -1,12 +1,12 @@
-#DataBinding 练级指南
+# DataBinding 练级指南
 ___
-##DataBinding是什么？
+## DataBinding是什么？
 
 DataBinding是一个自2015 Google IO 非C位出道的的一个框架。它的设计目的是把数据绑定到图形界面上去，而这里的界面指的正是你的布局文件。从Dan Galpin 在Android Dev Sumit 2018的rap般超快语速分享中获得灵感，让我们一起在DataBinidng世界中打怪升级。
 
-##初级阶段
+## 初级阶段
 
-###挥别findViewById
+### 挥别findViewById
 
 首些你需要打开DataBinding这个功能，方法也很简单，在Module的Gradle文件的android元素下添加以下三行:
 		
@@ -68,16 +68,16 @@ DataBinding是一个自2015 Google IO 非C位出道的的一个框架。它的�
     
 经历了上述过程我们已经跨越了初级阶段，这一切就像变魔法一样。但是建国之后不许成精，所以请看本期走进科学，DataBinding魔法背后的故事。  
 
-##中级阶段
+## 中级阶段
 
-###内置的绑定适配器(Binding Adapters)   
+### 内置的绑定适配器(Binding Adapters)   
 
 魔法的背后是DataBinding框架内置的绑定适配器，处理了几乎所有的事情。框架中的所有调用，实现上都是在BindingAdaper中完成的。
 
-###自定义的绑定适配器
+### 自定义的绑定适配器
 
 ### 可观察的数据
 
-##高级阶段
+## 高级阶段
 
 ### 双向绑定  
