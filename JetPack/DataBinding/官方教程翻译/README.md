@@ -20,7 +20,7 @@
 
 通过以下的文章来学习如何在你的应用中使用数据绑定库。
 
-### 使用入门
+### [使用入门](https://github.com/jinyulei0710/kaixue-docs/blob/master/JetPack/DataBinding/%E5%AE%98%E6%96%B9%E6%95%99%E7%A8%8B%E7%BF%BB%E8%AF%91/%E4%BD%BF%E7%94%A8%E5%85%A5%E9%97%A8.md)
 
 学习如何准备好你的开发环境，让它能使用数据绑定库，包括在Android Studio中对数据绑定代码的支持。
 
