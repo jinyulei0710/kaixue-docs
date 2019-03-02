@@ -49,7 +49,7 @@
 
 数据绑定库设给你生成了用来访问布局的变量和视图的绑定类。这篇文章向你你展示了如何使用和自定义被生成的绑定类。
 
-### 绑定适配器
+### [绑定适配器](https://github.com/jinyulei0710/kaixue-docs/blob/master/JetPack/DataBinding/%E5%AE%98%E6%96%B9%E6%95%99%E7%A8%8B%E7%BF%BB%E8%AF%91/%E7%BB%91%E5%AE%9A%E9%80%82%E9%85%8D%E5%99%A8.md)
 
 对于所有的布局表达式，都存在着一个绑定适配器，这个适配器要做出必要的框架调用，对对应的属性或监听器进行设置。例如，绑定适配器能够调用setText()方法来对文本属性进行设置以及调用setOnClickListener()方法来为点击事件添加监听器。例如在这个例子中使用的android：text属性是最常见的绑定适配器存在于android.databinding.adapter包中。想要看绑定适配器的列表，看下[adapters](https://android.googlesource.com/platform/frameworks/data-binding/+/studio-master-dev/extensions/baseAdapters/src/main/java/androidx/databinding/adapters)这个页面。你也可以创建自定义的适配器，如下例所示：
 
