@@ -74,10 +74,10 @@ DataBinding是一个自2015 Google IO 非C位出道的的一个框架。它的�
 
 魔法的背后是DataBinding框架内置的绑定适配器，处理了几乎所有的事情。框架中的所有调用，实现上都是在BindingAdaper中完成的。
 
-### 自定义的绑定适配器
+### [自定义的绑定适配器](https://github.com/jinyulei0710/kaixue-docs/blob/master/JetPack/DataBinding/%E5%AE%98%E6%96%B9%E6%95%99%E7%A8%8B%E7%BF%BB%E8%AF%91/%E7%BB%91%E5%AE%9A%E9%80%82%E9%85%8D%E5%99%A8.md)
 
-### 可观察的数据
+### [可观察的数据](https://github.com/jinyulei0710/kaixue-docs/blob/master/JetPack/DataBinding/%E5%AE%98%E6%96%B9%E6%95%99%E7%A8%8B%E7%BF%BB%E8%AF%91/%E4%BD%BF%E7%94%A8%E5%8F%AF%E8%A7%82%E5%AF%9F%E7%9A%84%E6%95%B0%E6%8D%AE%E5%AF%B9%E8%B1%A1.md)
 
 ## 高级阶段
 
-### 双向绑定  
+### [双向绑定](https://github.com/jinyulei0710/kaixue-docs/blob/master/JetPack/DataBinding/%E5%AE%98%E6%96%B9%E6%95%99%E7%A8%8B%E7%BF%BB%E8%AF%91/%E5%8F%8C%E5%90%91%E6%95%B0%E6%8D%AE%E7%BB%91%E5%AE%9A.md)  
